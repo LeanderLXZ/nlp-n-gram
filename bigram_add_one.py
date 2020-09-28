@@ -3,9 +3,9 @@ from bigram import biGram
 
 class biGramAddOne(biGram):
     
-    def __init__(self, unknown_ratiot=0.1):
+    def __init__(self, unknown_ratio=0.1):
         # Inherit from biGram class
-        super(biGramAddOne, self).__init__(unknown_ratiot)
+        super(biGramAddOne, self).__init__(unknown_ratio)
     
     def get_bigram_prob(self, word_counts, bigram_list, bigram_counts):
         bigram_prob = {}

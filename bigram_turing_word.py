@@ -3,7 +3,7 @@ from bigram import biGram
 
 class biGramTuring(biGram):
 
-    def __init__(self, unknown_ratio=0):
+    def __init__(self, unknown_ratio=0.1):
         
         # The ratio of unknown words
         self.UNKNOWN_RATIO = unknown_ratio
@@ -26,25 +26,28 @@ class biGramTuring(biGram):
 
         # Get bigram probabilities of each language
         self.bigram_prob_en, self.unknown_prob_en = self.get_bigram_prob(
-            word_counts_en, *self.get_bigram(words_en))
+            word_counts_en, self.word_list_en, *self.get_bigram(words_en))
         self.bigram_prob_fr, self.unknown_prob_fr = self.get_bigram_prob(
-            word_counts_fr, *self.get_bigram(words_fr))
+            word_counts_fr, self.word_list_fr, *self.get_bigram(words_fr))
         self.bigram_prob_gr, self.unknown_prob_gr = self.get_bigram_prob(
-            word_counts_gr, *self.get_bigram(words_gr))
+            word_counts_gr, self.word_list_gr, *self.get_bigram(words_gr))
 
-    def get_bigram_prob(self, word_counts, bigram_list, bigram_counts):
+    def get_bigram_prob(self, word_counts, word_list,
+                        bigram_list, bigram_counts):
         counts_of_c = {}
-        for _, count in bigram_counts.items():
-            if count in counts_of_c:
-                counts_of_c[count] += 1
+        for _, c in word_counts.items():
+            if c in counts_of_c:
+                counts_of_c[c] += 1
             else:
-                counts_of_c[count] = 1
+                counts_of_c[c] = 1
 
         n_c_list = sorted(counts_of_c.items(), key=lambda x:x[0])
+        c_most = n_c_list[-1][0]
         # words with zero frequency
-        unknown_prob = n_c_list[0][1] / len(bigram_list)
-        
-        # print(n_c_list[0][1], len(bigram_list), unknown_prob)
+        n_1 = n_c_list[0][1]
+        n_all = len(word_list)
+        unknown_prob = n_1 / n_all
+        print(unknown_prob)
 
         for i in range(1, n_c_list[-1][0]):
             if i not in counts_of_c:
@@ -60,14 +63,13 @@ class biGramTuring(biGram):
                 c_star[c] = (c + 1) * n_c_list[c + 1][1] / n_c
                 p_star[c] = c_star[c] / len(bigram_list)
 
-        k = 100
+        k = 10
         bigram_prob = {}
         for bigram in bigram_list:
-            if bigram_counts[bigram] < k:
-                bigram_prob[bigram] = p_star[bigram_counts[bigram]]
-            else:
-                bigram_prob[bigram] = \
-                    bigram_counts[bigram] / word_counts[bigram[0]]
+            c_word = word_counts[bigram[0]]
+            if c_word < k:
+                c_word = c_star[c_word] if c_star[c_word] != 0 else c_word
+            bigram_prob[bigram] = bigram_counts[bigram] / c_word
 
         return bigram_prob, unknown_prob
 
@@ -86,9 +88,8 @@ class biGramTuring(biGram):
                     if bigram_prob.get(bigram_i):
                         prob_sentence *= bigram_prob[bigram_i]
                     else:
-                        # Unknown bigrams
-                        # prob_sentence *= unknown_prob
-                        prob_sentence *= 0.000001
+                        # Set a very low probability for unknown bigrams
+                        prob_sentence *= unknown_prob
             # Get the language with the highest probability
             if prob_sentence > max_prob:
                 language = lang

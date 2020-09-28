@@ -1,8 +1,8 @@
 import re
 
-class biGram(object):
+class uniGram(object):
     
-    def __init__(self, unknown_ratio=0.01):
+    def __init__(self, unknown_ratio=0.001):
         
         # The ratio of unknown words
         self.UNKNOWN_RATIO = unknown_ratio
@@ -21,18 +21,7 @@ class biGram(object):
         self.unique_prob_fr = \
             self.get_unique_prob(self.word_list_fr, word_counts_fr)
         self.unique_prob_gr = \
-            self.get_unique_prob(self.word_list_gr, word_counts_gr) 
-
-        # Get bigram probabilities of each language
-        self.bigram_prob_en = self.get_bigram_prob(
-            word_counts_en, *self.get_bigram(words_en))
-        self.bigram_prob_fr = self.get_bigram_prob(
-            word_counts_fr, *self.get_bigram(words_fr))
-        self.bigram_prob_gr = self.get_bigram_prob(
-            word_counts_gr, *self.get_bigram(words_gr))
-
-        # print(len(word_counts_en), len(word_counts_fr), len(word_counts_gr))
-        # print(len(words_en), len(words_fr), len(words_gr))
+            self.get_unique_prob(self.word_list_gr, word_counts_gr)
     
     def text_normalization(self, text):
         words = []
@@ -84,56 +73,34 @@ class biGram(object):
         word_list = word_counts.keys()
         return word_list, new_words, word_counts
     
-    def get_bigram(self, words):
-        bigram_counts = {}
-        for i, word in enumerate(words):
-            if i < len(words) - 1:
-                bigram = (word, words[i+1])
-                if bigram in bigram_counts:
-                    bigram_counts[bigram] += 1
-                else:
-                    bigram_counts[bigram] = 1
-        bigram_list = bigram_counts.keys()
-        return bigram_list, bigram_counts
-    
     def get_unique_prob(self, word_list, word_counts):
         unique_prob = {}
         for word in word_list:
             unique_prob[word] = word_counts[word] / len(word_counts)
         return unique_prob
     
-    def get_bigram_prob(self, word_counts, bigram_list, bigram_counts):
-        bigram_prob = {}
-        for bigram in bigram_list:
-            bigram_prob[bigram] = bigram_counts[bigram] / word_counts[bigram[0]]
-        return bigram_prob
-    
     def predict(self, sentence):
         
         max_prob = 0
         language = 'EN'
-        for bigram_prob, unique_prob, word_list, lang in \
-                [(self.bigram_prob_en, self.unique_prob_en,
-                  self.word_list_en, 'EN'),
-                (self.bigram_prob_fr, self.unique_prob_fr,
-                 self.word_list_fr, 'FR'),
-                (self.bigram_prob_gr, self.unique_prob_gr,
-                 self.word_list_gr, 'GR')]:
+        for unigram_prob, word_list, lang in \
+                [(self.unique_prob_en, self.word_list_en, 'EN'),
+                 (self.unique_prob_fr, self.word_list_fr, 'FR'),
+                 (self.unique_prob_gr, self.word_list_gr, 'GR')]:
                     
             # Change unseen words in sentence to <UNK>
             sentence = ['<UNK>' if w not in word_list else w for w in sentence]
             
             # Calculate probability
             prob_sentence = 1
-            for i in range(len(sentence)):
-                if i < len(sentence) - 1:
-                    bigram_i = (sentence[i], sentence[i+1])
-                    # Test if the bigram is unseen for training set
-                    if bigram_prob.get(bigram_i):
-                        prob_sentence *= bigram_prob[bigram_i]
+            for i, unigram in enumerate(sentence):
+                if i < len(sentence):
+                    # Test if the unigram is unseen for training set
+                    if unigram_prob.get(unigram):
+                        prob_sentence *= unigram_prob[unigram]
                     else:
-                        # If bigram is unknown, use unique prob instead
-                        prob_sentence *= unique_prob[sentence[i]]
+                        # If bigram is unknown
+                        prob_sentence *= 0
                         
             # Get the language with the highest probability
             if prob_sentence > max_prob:
@@ -158,4 +125,4 @@ class biGram(object):
         print('Accuracy: {:.2f}%'.format(accuracy * 100))
 
 if __name__ == '__main__':
-    biGram().main()
+    uniGram().main()
