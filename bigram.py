@@ -25,11 +25,11 @@ class biGram(object):
 
         # Get bigram probabilities of each language
         self.bigram_prob_en = self.get_bigram_prob(
-            word_counts_en, *self.get_bigram(words_en))
+            word_counts_en, *self.get_n_bigram(words_en, 2))
         self.bigram_prob_fr = self.get_bigram_prob(
-            word_counts_fr, *self.get_bigram(words_fr))
+            word_counts_fr, *self.get_n_bigram(words_fr, 2))
         self.bigram_prob_gr = self.get_bigram_prob(
-            word_counts_gr, *self.get_bigram(words_gr))
+            word_counts_gr, *self.get_n_bigram(words_gr, 2))
 
         # print(len(word_counts_en), len(word_counts_fr), len(word_counts_gr))
         # print(len(words_en), len(words_fr), len(words_gr))
@@ -84,17 +84,17 @@ class biGram(object):
         word_list = word_counts.keys()
         return word_list, new_words, word_counts
     
-    def get_bigram(self, words):
-        bigram_counts = {}
+    def get_n_bigram(self, words, n):
+        n_gram_counts = {}
         for i, word in enumerate(words):
             if i < len(words) - 1:
-                bigram = (word, words[i+1])
-                if bigram in bigram_counts:
-                    bigram_counts[bigram] += 1
+                n_gram = tuple([words[i+j] for j in range(n)])
+                if n_gram in n_gram_counts:
+                    n_gram_counts[n_gram] += 1
                 else:
-                    bigram_counts[bigram] = 1
-        bigram_list = bigram_counts.keys()
-        return bigram_list, bigram_counts
+                    n_gram_counts[n_gram] = 1
+        n_gram_list = n_gram_counts.keys()
+        return n_gram_list, n_gram_counts
     
     def get_unique_prob(self, word_list, word_counts):
         unique_prob = {}

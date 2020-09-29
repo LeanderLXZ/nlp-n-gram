@@ -26,11 +26,11 @@ class biGramTuring(biGram):
 
         # Get bigram probabilities of each language
         self.bigram_prob_en, self.unknown_prob_en = self.get_bigram_prob(
-            word_counts_en, self.word_list_en, *self.get_bigram(words_en))
+            word_counts_en, self.word_list_en, *self.get_n_bigram(words_en, 2))
         self.bigram_prob_fr, self.unknown_prob_fr = self.get_bigram_prob(
-            word_counts_fr, self.word_list_fr, *self.get_bigram(words_fr))
+            word_counts_fr, self.word_list_fr, *self.get_n_bigram(words_fr, 2))
         self.bigram_prob_gr, self.unknown_prob_gr = self.get_bigram_prob(
-            word_counts_gr, self.word_list_gr, *self.get_bigram(words_gr))
+            word_counts_gr, self.word_list_gr, *self.get_n_bigram(words_gr, 2))
 
     def get_bigram_prob(self, word_counts, word_list,
                         bigram_list, bigram_counts):

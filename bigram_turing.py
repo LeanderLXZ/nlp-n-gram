@@ -26,11 +26,11 @@ class biGramTuring(biGram):
 
         # Get bigram probabilities of each language
         self.bigram_prob_en, self.unknown_prob_en = self.get_bigram_prob(
-            word_counts_en, *self.get_bigram(words_en))
+            word_counts_en, *self.get_n_bigram(words_en, 2))
         self.bigram_prob_fr, self.unknown_prob_fr = self.get_bigram_prob(
-            word_counts_fr, *self.get_bigram(words_fr))
+            word_counts_fr, *self.get_n_bigram(words_fr, 2))
         self.bigram_prob_gr, self.unknown_prob_gr = self.get_bigram_prob(
-            word_counts_gr, *self.get_bigram(words_gr))
+            word_counts_gr, *self.get_n_bigram(words_gr, 2))
 
     def get_bigram_prob(self, word_counts, bigram_list, bigram_counts):
         counts_of_c = {}
@@ -87,8 +87,8 @@ class biGramTuring(biGram):
                         prob_sentence *= bigram_prob[bigram_i]
                     else:
                         # Unknown bigrams
-                        # prob_sentence *= unknown_prob
-                        prob_sentence *= 0.000001
+                        prob_sentence *= unknown_prob
+                        # prob_sentence *= 0.000001
             # Get the language with the highest probability
             if prob_sentence > max_prob:
                 language = lang
